@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+
+    container_name: smartims-backend
+
+    restart: unless-stopped
+
+    ports:
+      - "${PORT}:${PORT}"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_PASSWORD: ${GMAIL_PASSWORD}
+      PORT: ${PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      FRONTEND_LOGIN_URL: ${FRONTEND_LOGIN_URL}
+
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: smartims-frontend
+
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "3000:80"
