@@ -126,9 +126,9 @@ pipeline {
 
                 kubectl apply -f Kubernetes/
 
-                kubectl rollout restart deployment smartims-backend
+                kubectl rollout restart deployment smartims-backend -n smartims
 
-                kubectl rollout restart deployment smartims-frontend
+                kubectl rollout restart deployment smartims-frontend -n smartims
                 '''
             }
 
@@ -139,13 +139,13 @@ pipeline {
             steps {
 
                 sh '''
-                kubectl get pods
+                kubectl get pods -n smartims
 
-                kubectl get svc
+                kubectl get svc -n smartims
 
-                kubectl rollout status deployment/smartims-backend
+                kubectl rollout status deployment/smartims-backend -n smartims
 
-                kubectl rollout status deployment/smartims-frontend
+                kubectl rollout status deployment/smartims-frontend -n smartims
                 '''
             }
 
