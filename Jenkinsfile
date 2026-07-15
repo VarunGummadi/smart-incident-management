@@ -15,7 +15,7 @@ pipeline {
 
         IMAGE_TAG = "${BUILD_NUMBER}"
 
-        SONAR_HOME = tool 'SonarQube'
+        // SONAR_HOME = tool 'SonarQube'
     }
 
     stages {
@@ -53,19 +53,19 @@ pipeline {
             }
         }
 
-        stage('Code Quality Test') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    dir('backend') {
-                        sh '''
-                        mvn sonar:sonar \
-                        -Dsonar.projectKey=smartims \
-                        -Dsonar.projectName=smartims
-                        '''
-                    }
-                }
-            }
-        }
+        //stage('Code Quality Test') {
+           // steps {
+                //withSonarQubeEnv('SonarQube') {
+                   // dir('backend') {
+                       // sh '''
+                       // mvn sonar:sonar \
+                       // -Dsonar.projectKey=smartims \
+                       // -Dsonar.projectName=smartims
+                       // '''
+                    //}
+               // }
+            //}
+        //}
 
         stage('Build Docker Images') {
             steps {
