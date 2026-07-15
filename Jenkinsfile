@@ -122,6 +122,8 @@ pipeline {
             steps {
 
                 sh '''
+                kubectl apply -f kubernetes/namespace.yaml
+                
                 kubectl apply -f kubernetes/
 
                 kubectl rollout restart deployment smartims-backend

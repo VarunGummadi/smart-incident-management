@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartims-backend
+  namespace: smartims
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: smartims-backend
+
+  template:
+    metadata:
+      labels:
+        app: smartims-backend
+
+    spec:
+      containers:
+      - name: backend
+        image: varungummadi/smartims-backend:latest
+
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 8081
+
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: docker
+
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://<POSTGRES_HOST>:5432/smart_IMS
+
+        - name: SPRING_DATASOURCE_USERNAME
+          value: postgres
+
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: your_password

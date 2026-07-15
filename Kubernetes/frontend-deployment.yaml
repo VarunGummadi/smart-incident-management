@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: smartims-frontend
+  namespace: smartims
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: smartims-frontend
+
+  template:
+    metadata:
+      labels:
+        app: smartims-frontend
+
+    spec:
+      containers:
+      - name: frontend
+
+        image: varungummadi/smartims-frontend:latest
+
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 80
