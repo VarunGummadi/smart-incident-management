@@ -100,7 +100,7 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                 )]) {
 
-                    sh '''
+                    sh """
                     echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 
                     docker push '${BACKEND_IMAGE}:${IMAGE_TAG}'
@@ -110,7 +110,7 @@ pipeline {
                     docker push '${FRONTEND_IMAGE}:latest'
 
                     docker logout
-                    '''
+                    """
                 }
 
             }
