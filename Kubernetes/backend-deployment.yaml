@@ -30,7 +30,7 @@ spec:
           value: docker
 
         - name: SPRING_DATASOURCE_URL
-          value: jdbc:postgresql://<POSTGRES_HOST>:5432/smart_IMS
+          value: jdbc:postgresql://postgres-service:5432/smart_IMS
 
         - name: SPRING_DATASOURCE_USERNAME
           value: postgres
