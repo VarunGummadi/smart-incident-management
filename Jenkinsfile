@@ -130,7 +130,9 @@ pipeline {
             steps {
 
                 sh '''
-                    cd /var/lib/jenkins/projects/smart-incident-management
+                    cd /home/ubuntu/smart-incident-management
+
+                    docker compose down || true
 
                     docker compose pull
 
