@@ -130,8 +130,9 @@ pipeline {
             steps {
 
                 sh '''
-                    cd /home/ubuntu/smart-incident-management
-
+                    pwd
+                    ls -la
+                    
                     docker compose down || true
 
                     docker compose pull
