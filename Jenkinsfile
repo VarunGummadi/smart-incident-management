@@ -14,17 +14,15 @@ pipeline {
         FRONTEND_IMAGE = "${DOCKER_USERNAME}/smartims-frontend"
 
         IMAGE_TAG = "${BUILD_NUMBER}"
-
-        // SONAR_HOME = tool 'SonarQube'
     }
 
     stages {
 
-        stage('Code Checkout') {
+        stage('Checkout Source Code') {
             steps {
                 git branch: 'main',
-                credentialsId: 'github-creds',
-                url: 'https://github.com/VarunGummadi/smart-incident-management.git'
+                    credentialsId: 'github-creds',
+                    url: 'https://github.com/VarunGummadi/smart-incident-management.git'
             }
         }
 
@@ -45,7 +43,7 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
+        stage('Run Unit Tests') {
             steps {
                 dir('backend') {
                     sh 'mvn test'
@@ -53,19 +51,29 @@ pipeline {
             }
         }
 
-        //stage('Code Quality Test') {
-           // steps {
-                //withSonarQubeEnv('SonarQube') {
-                   // dir('backend') {
-                       // sh '''
-                       // mvn sonar:sonar \
-                       // -Dsonar.projectKey=smartims \
-                       // -Dsonar.projectName=smartims
-                       // '''
-                    //}
-               // }
-            //}
-        //}
+        /*
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    dir('backend') {
+                        sh """
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=smartims \
+                        -Dsonar.projectName=smartims
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        */
 
         stage('Build Docker Images') {
             steps {
@@ -77,102 +85,77 @@ pipeline {
                 dir('frontend') {
                     sh "docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} ."
                 }
+
             }
         }
 
         stage('Tag Docker Images') {
             steps {
-
                 sh """
-                docker tag ${BACKEND_IMAGE}:${IMAGE_TAG} ${BACKEND_IMAGE}:latest
-                docker tag ${FRONTEND_IMAGE}:${IMAGE_TAG} ${FRONTEND_IMAGE}:latest
+                    docker tag ${BACKEND_IMAGE}:${IMAGE_TAG} ${BACKEND_IMAGE}:latest
+                    docker tag ${FRONTEND_IMAGE}:${IMAGE_TAG} ${FRONTEND_IMAGE}:latest
                 """
             }
         }
 
         stage('Push Docker Images') {
-
             steps {
 
-                withCredentials([usernamePassword(
+                withCredentials([
+                    usernamePassword(
                         credentialsId: 'dockerhub-creds',
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
-                )]) {
+                    )
+                ]) {
 
                     sh """
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
 
-                    docker push '${BACKEND_IMAGE}:${IMAGE_TAG}'
-                    docker push '${BACKEND_IMAGE}:latest'
+                        docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${BACKEND_IMAGE}:latest
 
-                    docker push '${FRONTEND_IMAGE}:${IMAGE_TAG}'
-                    docker push '${FRONTEND_IMAGE}:latest'
+                        docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${FRONTEND_IMAGE}:latest
 
-                    docker logout
+                        docker logout
                     """
+
                 }
 
             }
-
         }
 
-        stage('Deploy to Kubernetes') {
-
+        stage('Deploy using Docker Compose') {
             steps {
 
                 sh '''
-                kubectl apply -f Kubernetes/namespace.yaml
+                    cd /var/lib/jenkins/projects/smart-incident-management
 
-                kubectl apply -f Kubernetes/
+                    docker compose pull
 
-                kubectl rollout restart deployment smartims-backend -n smartims
+                    docker compose up -d --remove-orphans
 
-                kubectl rollout restart deployment smartims-frontend -n smartims
+                    docker compose ps
                 '''
+
             }
-
         }
-
-        stage('Verify Deployment') {
-
-            steps {
-
-                sh '''
-                kubectl get pods -n smartims
-
-                kubectl get svc -n smartims
-
-                kubectl rollout status deployment/smartims-backend -n smartims
-
-                kubectl rollout status deployment/smartims-frontend -n smartims
-                '''
-            }
-
-        }
-
     }
 
     post {
 
         success {
-
-            echo "Pipeline executed successfully."
-
+            echo 'Pipeline executed successfully.'
         }
 
         failure {
-
-            echo "Pipeline failed."
-
+            echo 'Pipeline execution failed.'
         }
 
         always {
-
+            sh 'docker logout || true'
             cleanWs()
-
         }
-
     }
-
 }
